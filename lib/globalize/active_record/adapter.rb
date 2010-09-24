@@ -57,21 +57,25 @@ module Globalize
           Globalize.fallbacks(locale).each do |fallback|
             translation = translations.detect { |t| t.locale == fallback }
             value  = translation && translation.send(attr_name)
-            locale = fallback && break if value
+            if value
+              locale = fallback
+              break
+            end
           end
 
+          translation_metadata_accessor(value)
           set_metadata(value, :locale => locale, :requested_locale => requested_locale)
           value
         end
 
         def set_metadata(object, metadata)
           if object.respond_to?(:translation_metadata)
-            object.translation_metadata.merge!(meta_data)
+            object.translation_metadata.merge!(metadata)
           end
         end
 
         def translation_metadata_accessor(object)
-          return if obj.respond_to?(:translation_metadata)
+          return if object.respond_to?(:translation_metadata)
           class << object; attr_accessor :translation_metadata end
           object.translation_metadata ||= {}
         end
